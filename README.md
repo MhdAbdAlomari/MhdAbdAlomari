@@ -15,7 +15,7 @@
 
 **Local Storage:** Hive • Sqflite • Drift • Secure Storage — Offline-first apps
 
-**Testing & CI/CD:** Unit / Widget / Integration Testing • Mocktail • bloc_test • Codemagic • Fastlane • Shorebird • GitHub Actions
+**CI/CD:** Codemagic • Shorebird • GitHub Actions
 
 **Other:** GoRouter • GetIt • Freezed • Dio • Platform Channels • Performance Optimization (DevTools, Impeller)
 
