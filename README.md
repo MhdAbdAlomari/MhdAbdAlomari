@@ -30,4 +30,3 @@
 
 - 📧 mohamed.alomari.dev@gmail.com
 - 💼 [LinkedIn](https://www.linkedin.com/in/mhdalomari)
-- 🛒 [Mostaql](https://mostaql.com/Abdulrhman_Alomari)
