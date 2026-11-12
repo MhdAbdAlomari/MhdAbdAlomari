@@ -1,0 +1,17 @@
+{
+  "name": "profile-assets",
+  "private": true,
+  "description": "Generates the SVG artwork used by the profile README.",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "@fontsource/geist-mono": "5.2.5",
+    "@fontsource/geist-sans": "5.2.5",
+    "fontkit": "2.0.4"
+  }
+}
