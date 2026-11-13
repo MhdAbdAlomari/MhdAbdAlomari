@@ -40,7 +40,9 @@ const PROFILE = {
 // Clean Architecture layers drawn in the banner, innermost first.
 const LAYERS = ['Entities', 'Use cases', 'Adapters', 'Frameworks'];
 
-// Summaries wrap automatically (3 lines max). In fact labels, \n forces a break.
+// Each project gets two cards: a tall tile for phones and tablets, and a wide
+// card for desktop. Summaries wrap automatically (3 lines max). In fact labels,
+// \n is the line break used on the tile; the wide card re-wraps labels itself.
 const PROJECTS = [
   {
     file: 'ashafaq',
@@ -48,7 +50,7 @@ const PROJECTS = [
     sector: 'Car wash platform',
     region: 'Saudi Arabia',
     summary:
-      'Built all three apps from the ground up — customer, worker and branch management — and continue to maintain and improve them in production.',
+      'Developed all three Flutter apps from scratch — customer, worker and branch management — and keep maintaining, updating and improving them in production.',
     facts: [
       ['15,000+', 'Active users'],
       ['14,000+', 'Completed\noperations'],
@@ -61,11 +63,11 @@ const PROJECTS = [
     sector: 'Education platform',
     region: 'Turkey',
     summary:
-      'Migrated the native mobile app to Flutter on Clean Architecture with BLoC/Cubit, dependency injection and GoRouter, plus in-app video conferencing.',
+      'Migrated the native app to Flutter on Clean Architecture with BLoC/Cubit, GetIt, GoRouter and REST APIs, plus Firebase and Crashlytics.',
     facts: [
       ['~25,000', 'Users'],
-      ['Flutter', 'Migrated\nfrom native'],
-      ['Zoom SDK', 'Video\nconferencing'],
+      ['1,100+', 'Unit + widget\ntests'],
+      ['Zoom', 'Meeting SDK for\nonline classes'],
     ],
   },
   {
@@ -73,13 +75,25 @@ const PROJECTS = [
     name: 'ShamFix',
     sector: 'Home & building maintenance',
     region: null,
-    role: 'Team lead', // optional; shown in teal at the end of the eyebrow line
     summary:
-      'Implemented and tested AI-powered fault diagnosis using image and text analysis APIs, with automatic service classification and request pre-filling.',
+      'Built the customer and technician Flutter apps, implemented and tested AI fault diagnosis, and coordinated with the backend developer on the API.',
     facts: [
-      ['3', 'Customer, tech\n& admin apps'],
+      ['Founder', 'Idea originator\n& tech lead'],
       ['8', 'Request statuses\n& approvals'],
       ['Stripe', '+ cash, wallets\n& commissions'],
+    ],
+  },
+  {
+    file: 'orangi',
+    name: 'ORANGI',
+    sector: 'Education app',
+    region: 'FASIH organization',
+    summary:
+      'Developed the Flutter app for a separate education platform: student accounts, learning management, subscriptions and an in-app wallet.',
+    facts: [
+      ['~25,000', 'Users'],
+      ['Live', 'Online lessons\n& recordings'],
+      ['Private', 'Lesson\nbooking'],
     ],
   },
   {
@@ -88,7 +102,7 @@ const PROJECTS = [
     sector: 'Food delivery',
     region: 'Syria',
     summary:
-      'A food delivery app built for the Syrian market, developed remotely as part of a distributed Syrian team based in Germany.',
+      'Developed the Flutter app collaboratively with a distributed team, on Clean Architecture with BLoC, GoRouter, GetIt and Cloud Firestore.',
     facts: [
       ['Syria', 'Target market'],
       ['Remote', 'Team based\nin Germany'],
@@ -97,9 +111,12 @@ const PROJECTS = [
   },
 ];
 
+// Pill buttons. `small` ones sit under project cards as store links.
 const LINKS = [
   { file: 'linkedin', label: 'LinkedIn' },
   { file: 'email', label: 'Email' },
+  { file: 'google-play', label: 'Google Play', small: true },
+  { file: 'app-store', label: 'App Store', small: true },
 ];
 
 /* ──────────────────────────────── TOKENS ──────────────────────────────── */
@@ -428,7 +445,11 @@ function bannerCompact() {
   });
 }
 
-/** Project tile, drawn at 2x and shown 410px wide: two per row on desktop, one per row on phones. */
+const cardTitle = (p) => `${p.name} — ${p.sector}${p.region ? `, ${p.region}` : ''}`;
+const cardDesc = (p) =>
+  `${p.summary} ${p.facts.map(([v, l]) => `${v} ${l.replace(/\n/g, ' ').toLowerCase()}`).join(', ')}.`;
+
+/** Project tile for phones and tablets: drawn at 820 wide, shown at up to 460px. */
 function projectCard(project, index) {
   const W = 820;
   const H = 536;
@@ -450,12 +471,8 @@ function projectCard(project, index) {
 
   const num = String(index + 1).padStart(2, '0');
   const numWidth = measure(num, indexStyle);
-  const sep = '  ·  ';
-  const sector = [project.sector, project.region].filter(Boolean).map(upper).join(sep) + (project.role ? sep : '');
-  const role = project.role ? upper(project.role) : '';
-  const eyebrowX = x0 + numWidth + 44;
-  const roleX = eyebrowX + measure(sector, eyebrow) + eyebrow.tracking;
-  if (roleX - x0 + measure(role, eyebrow) > inner) throw new Error(`${project.name}: eyebrow is too long.`);
+  const sector = [project.sector, project.region].filter(Boolean).map(upper).join('  ·  ');
+  if (numWidth + 44 + measure(sector, eyebrow) > inner) throw new Error(`${project.name}: eyebrow is too long.`);
 
   const colW = inner / 3;
   const facts = project.facts.flatMap(([v, l], i) => {
@@ -470,34 +487,106 @@ function projectCard(project, index) {
     surface(box),
     text(num, indexStyle, x0, 90),
     `<rect x="${x0 + numWidth + 14}" y="83" width="16" height="1.5" fill="${C.textMuted}"/>`,
-    text(sector, eyebrow, eyebrowX, 90),
-    ...(role ? [text(role, { ...eyebrow, fill: C.accentSoft }, roleX, 90)] : []),
+    text(sector, eyebrow, x0 + numWidth + 44, 90),
     text(project.name, name, x0 - 2, 170),
     ...lines.map((ln, i) => text(ln, summary, x0, 226 + i * 39)),
     `<rect x="${x0}" y="338" width="${inner}" height="1" fill="${C.border}"/>`,
     ...facts,
   ].join('\n');
 
-  const factText = project.facts.map(([v, l]) => `${v} ${l.replace(/\n/g, ' ').toLowerCase()}`).join(', ');
+  const shown = 460; // display width; GitHub scales it down on narrower screens
   return svg({
-    width: W,
-    height: H,
+    width: shown,
+    height: +((H * shown) / W).toFixed(1),
     viewBox: `0 0 ${W} ${H}`,
-    title: `${project.name} — ${project.sector}${project.region ? `, ${project.region}` : ''}`,
-    desc: `${project.summary} ${factText}.`,
+    title: cardTitle(project),
+    desc: cardDesc(project),
     defs: surfaceDefs({ ...box, glow: { cx: W - M - 30, cy: M + 10, r: 360, opacity: 0.13 } }),
     body,
   });
 }
 
-/** Pill-shaped link button, drawn at 2x. */
-function linkButton({ label }) {
+/**
+ * Wide project card for desktop: drawn at 2x and shown 846px wide, the width
+ * of GitHub's profile README column. Story on the left, facts panel on the right.
+ */
+function projectWide(project, index, valueColumn) {
+  const W = 1692;
+  const H = 396;
+  const P = 60;
+  const split = 1090; // where the facts panel starts
+  const box = { x: 0, y: 0, w: W, h: H, r: 28 };
+  const leftW = split - P - 64;
+
+  const indexStyle = { font: MONO[500], size: 22, tracking: 2.2, fill: C.accent };
+  const eyebrow = { font: MONO[400], size: 22, tracking: 2.4, fill: C.textMuted };
+  const name = { font: SANS[600], size: 64, tracking: -1.4, fill: C.text };
+  const summary = { font: SANS[400], size: 30, fill: C.textSoft };
+  const value = WIDE_VALUE;
+  const label = { font: MONO[400], size: 20, tracking: 1.5, fill: C.textMuted };
+
+  const lines = wrap(project.summary, summary, leftW);
+  if (lines.length > 3) throw new Error(`${project.name} (wide): summary needs ${lines.length} lines (max 3).`);
+
+  const num = String(index + 1).padStart(2, '0');
+  const numWidth = measure(num, indexStyle);
+  const sector = [project.sector, project.region].filter(Boolean).map(upper).join('  ·  ');
+  if (numWidth + 48 + measure(sector, eyebrow) > leftW) throw new Error(`${project.name} (wide): eyebrow is too long.`);
+
+  // Facts panel: three rows, value column shared by every card so they line up.
+  const rowsTop = 40;
+  const rowH = (H - 2 * rowsTop) / 3;
+  const valueX = split + 56;
+  const labelX = valueX + valueColumn;
+  const labelW = W - P - labelX;
+  const facts = project.facts.flatMap(([v, l], i) => {
+    const mid = rowsTop + rowH * i + rowH / 2;
+    // One line when it fits; otherwise keep the tile's intended break.
+    const joined = upper(l.replace(/\n/g, ' '));
+    const labelLines = measure(joined, label) <= labelW ? [joined] : wrap(upper(l), label, labelW);
+    if (labelLines.length > 2) throw new Error(`${project.name} (wide): fact label "${l}" needs more than two lines.`);
+    const first = mid + capMiddle(label) - ((labelLines.length - 1) * 27) / 2;
+    return [
+      ...(i > 0 ? [`<rect x="${split + 48}" y="${rowsTop + rowH * i}" width="${W - split - 96}" height="1" fill="${C.border}"/>`] : []),
+      text(v, value, valueX - 1, mid + capMiddle(value)),
+      ...labelLines.map((ln, j) => text(ln, label, labelX, first + j * 27)),
+    ];
+  });
+
+  const body = [
+    surface(
+      box,
+      `<rect x="${split}" y="0" width="${W - split}" height="${H}" fill="#FFFFFF" fill-opacity=".018"/>\n` +
+        `<rect x="${split}" y="0" width="1" height="${H}" fill="${C.border}"/>`,
+    ),
+    text(num, indexStyle, P, 100),
+    `<rect x="${P + numWidth + 16}" y="92.5" width="18" height="1.5" fill="${C.textMuted}"/>`,
+    text(sector, eyebrow, P + numWidth + 48, 100),
+    text(project.name, name, P - 2, 186),
+    ...lines.map((ln, i) => text(ln, summary, P, 246 + i * 42)),
+    ...facts,
+  ].join('\n');
+
+  return svg({
+    width: W / 2,
+    height: H / 2,
+    viewBox: `0 0 ${W} ${H}`,
+    title: cardTitle(project),
+    desc: cardDesc(project),
+    defs: surfaceDefs({ ...box, glow: { cx: split, cy: 0, r: 620, opacity: 0.12 } }),
+    body,
+  });
+}
+
+/** Pill-shaped link button, drawn at 2x. Small pills are store links under project cards. */
+function linkButton({ label, small = false }) {
   const S = 2;
-  const H = 40 * S;
-  const labelStyle = { font: MONO[500], size: 13 * S, tracking: 1.8 * S, fill: C.accentSoft };
-  const arrowStyle = { font: SANS[500], size: 15 * S, fill: C.accentSoft };
-  const padX = 20 * S;
-  const gap = 9 * S;
+  const k = small ? 0.8 : 1;
+  const H = Math.round(40 * k) * S;
+  const labelStyle = { font: MONO[500], size: 13 * k * S, tracking: 1.8 * k * S, fill: C.accentSoft };
+  const arrowStyle = { font: SANS[500], size: 15 * k * S, fill: C.accentSoft };
+  const padX = 20 * k * S;
+  const gap = 9 * k * S;
   const tw = measure(upper(label), labelStyle);
   const aw = measure('↗', arrowStyle);
   const W = Math.ceil(padX * 2 + tw + gap + aw);
@@ -521,10 +610,15 @@ function linkButton({ label }) {
 
 /* ───────────────────────────────── BUILD ───────────────────────────────── */
 
+// The wide cards share one value column, sized to the widest fact value.
+const WIDE_VALUE = { font: SANS[600], size: 46, tracking: -0.8, fill: C.text };
+const wideValueColumn = Math.ceil(Math.max(...PROJECTS.flatMap((p) => p.facts.map(([v]) => measure(v, WIDE_VALUE))))) + 40;
+
 const files = {
   'banner.svg': banner(),
   'banner-compact.svg': bannerCompact(),
   ...Object.fromEntries(PROJECTS.map((p, i) => [`projects/${p.file}.svg`, projectCard(p, i)])),
+  ...Object.fromEntries(PROJECTS.map((p, i) => [`projects/${p.file}-wide.svg`, projectWide(p, i, wideValueColumn)])),
   ...Object.fromEntries(LINKS.map((l) => [`links/${l.file}.svg`, linkButton(l)])),
 };
 
